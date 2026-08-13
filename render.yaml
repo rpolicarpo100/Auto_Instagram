@@ -17,6 +17,18 @@ services:
         value: "3.11.9"
       - key: CORS_ORIGINS
         sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: TOKEN_ENCRYPTION_KEY
+        sync: false
+      - key: META_APP_ID
+        sync: false
+      - key: META_APP_SECRET
+        sync: false
+      - key: META_REDIRECT_URI
+        sync: false
 
   - type: web
     name: instagram-ai-factory-web

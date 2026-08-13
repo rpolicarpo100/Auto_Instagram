@@ -4,15 +4,22 @@ AI-powered Instagram content operating system.
 
 This repository is built in **30 phases**. Phase 01 is the deploy foundation only.
 
-## What works now (Phase 02)
+## What works now (Phase 08)
 
-- FastAPI backend with a real health endpoint
-- App shell: Dashboard, Produção, Biblioteca, Calendário, Analytics, Receita, Instagram, AI Brain, Settings
-- Honest empty states (NO DATA / NOT CONFIGURED / NOT IMPLEMENTED)
-- Render blueprint
-- Environment template (no secrets)
+- FastAPI `/api/health` and `/api/v1/*`
+- Register / login / session cookies
+- Dashboard and Instagram screens with honest empty states
+- Official Meta OAuth **when** `META_*` and `DATABASE_URL` are set
 
-Deployed API (example): `https://auto-instagram-1aci.onrender.com/api/health`
+Deployed API: `https://auto-instagram-1aci.onrender.com/api/health`
+
+### Render env (API service)
+
+- `DATABASE_URL` — Render PostgreSQL (required for login)
+- `CORS_ORIGINS` — exact Static Site origin, e.g. `https://xxx.onrender.com`
+- `SESSION_SECRET`
+- `TOKEN_ENCRYPTION_KEY` (Fernet)
+- `META_APP_ID` / `META_APP_SECRET` / `META_REDIRECT_URI` = `https://auto-instagram-1aci.onrender.com/api/v1/instagram/callback`
 
 Later phases add auth, Instagram OAuth, media, Reels, analytics, and agents. Those features are **not implemented** yet.
 

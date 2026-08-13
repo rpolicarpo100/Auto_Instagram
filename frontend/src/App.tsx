@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AppShell } from "./components/layout/AppShell";
+import { Auth } from "./pages/Auth";
 import { Dashboard } from "./pages/Dashboard";
 import { Instagram } from "./pages/Instagram";
 import { Landing } from "./pages/Landing";
@@ -11,6 +12,8 @@ export default function App() {
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route element={<AppShell />}>
+        <Route path="/login" element={<Auth mode="login" />} />
+        <Route path="/register" element={<Auth mode="register" />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route
           path="/producao"

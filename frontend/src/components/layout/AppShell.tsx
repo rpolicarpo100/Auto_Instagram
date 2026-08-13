@@ -11,6 +11,7 @@ const nav = [
   { to: "/instagram", label: "Instagram" },
   { to: "/ai-brain", label: "AI Brain" },
   { to: "/settings", label: "Settings" },
+  { to: "/login", label: "Login" },
 ];
 
 export function AppShell() {

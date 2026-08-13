@@ -1,4 +1,15 @@
 services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: iaf
+      POSTGRES_PASSWORD: iaf
+      POSTGRES_DB: instagram_ai_factory
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
   api:
     build:
       context: ./backend
@@ -8,4 +19,11 @@ services:
     environment:
       APP_ENV: development
       CORS_ORIGINS: http://localhost:5173
+      DATABASE_URL: postgresql+psycopg://iaf:iaf@db:5432/instagram_ai_factory
+      SESSION_SECRET: dev-only
+    depends_on:
+      - db
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+volumes:
+  pgdata:

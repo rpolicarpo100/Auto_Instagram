@@ -1,7 +1,29 @@
+import { useEffect, useState } from "react";
 import { StatusBlock } from "../components/ui/StatusBlock";
-import { apiBase } from "../lib/api";
+import { apiBase, authApi, dataApi } from "../lib/api";
 
 export function Settings() {
+  const [email, setEmail] = useState<string | null>(null);
+  const [db, setDb] = useState("…");
+  const [meta, setMeta] = useState("…");
+
+  useEffect(() => {
+    authApi
+      .me()
+      .then((m) => setEmail(m.email))
+      .catch(() => setEmail(null));
+    dataApi
+      .config()
+      .then((c) => {
+        setDb(String(c.database));
+        setMeta(String(c.meta_oauth));
+      })
+      .catch(() => {
+        setDb("NOT AVAILABLE");
+        setMeta("NOT AVAILABLE");
+      });
+  }, []);
+
   return (
     <div>
       <h1 className="text-3xl tracking-tight">Settings</h1>
@@ -15,10 +37,11 @@ export function Settings() {
           detail="Frontend build-time API origin"
         />
         <StatusBlock
-          label="Auth"
-          value="NOT IMPLEMENTED"
-          detail="Sessions land in Phase 05"
+          label="Signed-in user"
+          value={email || "NOT AUTHENTICATED"}
         />
+        <StatusBlock label="Database" value={db} />
+        <StatusBlock label="Meta OAuth" value={meta} />
       </div>
     </div>
   );

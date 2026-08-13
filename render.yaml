@@ -1,0 +1,29 @@
+# Render blueprint — Phase 01 foundation
+# Secrets must be set in the Render dashboard, never committed.
+
+services:
+  - type: web
+    name: instagram-ai-factory-api
+    runtime: python
+    rootDir: backend
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: PYTHON_VERSION
+        value: "3.11.9"
+      - key: CORS_ORIGINS
+        sync: false
+
+  - type: web
+    name: instagram-ai-factory-web
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        sync: false

@@ -1,0 +1,1 @@
+{"root":["./src/App.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/components/layout/AppShell.tsx","./src/components/ui/StatusBlock.tsx","./src/lib/api.ts","./src/lib/cn.ts","./src/pages/Dashboard.tsx","./src/pages/Instagram.tsx","./src/pages/Landing.tsx","./src/pages/Placeholder.tsx","./src/pages/Settings.tsx"],"version":"5.9.3"}

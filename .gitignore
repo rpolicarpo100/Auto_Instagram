@@ -1,3 +1,9 @@
+# Homedir caches (sandbox)
+.cache/
+.npm/
+.local/
+.ssh/
+
 # Env and secrets
 .env
 .env.local

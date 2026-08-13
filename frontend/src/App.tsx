@@ -4,6 +4,7 @@ import { Auth } from "./pages/Auth";
 import { Dashboard } from "./pages/Dashboard";
 import { Instagram } from "./pages/Instagram";
 import { Landing } from "./pages/Landing";
+import { Library } from "./pages/Library";
 import { Placeholder } from "./pages/Placeholder";
 import { Settings } from "./pages/Settings";
 
@@ -24,15 +25,7 @@ export default function App() {
             />
           }
         />
-        <Route
-          path="/biblioteca"
-          element={
-            <Placeholder
-              title="Biblioteca"
-              capability="Media library is not implemented. No uploads."
-            />
-          }
-        />
+        <Route path="/biblioteca" element={<Library />} />
         <Route
           path="/calendario"
           element={

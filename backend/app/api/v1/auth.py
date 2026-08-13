@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -8,6 +8,7 @@ from app.schemas.auth import LoginRequest, RegisterRequest, UserOut
 from app.security.deps import get_current_user, require_database
 from app.security.passwords import hash_password, verify_password
 from app.security.tokens import hash_token, new_session_token, session_expiry
+from app.core.rate_limit import rate_limit
 from app.settings import settings
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -28,8 +29,12 @@ def _set_cookie(response: Response, token: str) -> None:
 
 @router.post("/register", response_model=UserOut)
 def register(
-    payload: RegisterRequest, response: Response, db: Session = Depends(get_db)
+    payload: RegisterRequest,
+    request: Request,
+    response: Response,
+    db: Session = Depends(get_db),
 ):
+    rate_limit(request, limit=10, window_seconds=60)
     require_database()
     email = payload.email.lower()
     if db.query(User).filter(User.email == email).first():
@@ -50,7 +55,13 @@ def register(
 
 
 @router.post("/login", response_model=UserOut)
-def login(payload: LoginRequest, response: Response, db: Session = Depends(get_db)):
+def login(
+    payload: LoginRequest,
+    request: Request,
+    response: Response,
+    db: Session = Depends(get_db),
+):
+    rate_limit(request, limit=15, window_seconds=60)
     require_database()
     user = db.query(User).filter(User.email == payload.email.lower()).first()
     if user is None or not verify_password(payload.password, user.password_hash):
@@ -74,7 +85,14 @@ def logout(
 ):
     db.query(UserSession).filter(UserSession.user_id == user.id).delete()
     db.commit()
-    response.delete_cookie(settings.session_cookie_name, path="/")
+    secure = settings.cookie_secure()
+    response.delete_cookie(
+        settings.session_cookie_name,
+        path="/",
+        secure=secure,
+        httponly=True,
+        samesite="none" if secure else "lax",
+    )
     return {"ok": True}
 
 

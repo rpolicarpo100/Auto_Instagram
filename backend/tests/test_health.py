@@ -8,10 +8,10 @@ client = TestClient(app)
 def test_api_health():
     response = client.get("/api/health")
     assert response.status_code == 200
-    assert response.json() == {
-        "status": "ok",
-        "service": "instagram-ai-factory",
-    }
+    body = response.json()
+    assert body["status"] == "ok"
+    assert body["service"] == "instagram-ai-factory"
+    assert body["database"] in {"CONFIGURED", "NOT_CONFIGURED"}
     assert "X-Request-ID" in response.headers
 
 

@@ -3,21 +3,32 @@ export const apiBase = (import.meta.env.VITE_API_BASE_URL || "").replace(
   ""
 );
 
-export type Health = { status: string; service: string };
+export type Health = { status: string; service: string; database?: string };
 
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const headers = new Headers(init.headers || {});
+  const isForm = typeof FormData !== "undefined" && init.body instanceof FormData;
+  if (!isForm && !headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
   const res = await fetch(`${apiBase}${path}`, {
     credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      ...(init.headers || {}),
-    },
     ...init,
+    headers,
   });
   const text = await res.text();
-  const data = text ? JSON.parse(text) : {};
+  let data: Record<string, unknown> = {};
+  if (text) {
+    try {
+      data = JSON.parse(text) as Record<string, unknown>;
+    } catch {
+      const err = new Error("API_NON_JSON") as Error & { status?: number };
+      err.status = res.status;
+      throw err;
+    }
+  }
   if (!res.ok) {
-    const err = new Error(data.detail || `HTTP ${res.status}`) as Error & {
+    const err = new Error(String(data.detail || `HTTP ${res.status}`)) as Error & {
       status?: number;
       payload?: unknown;
     };
@@ -29,8 +40,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 }
 
 export async function fetchHealth(): Promise<
-  | { kind: "ok"; data: Health }
-  | { kind: "unavailable"; detail: string }
+  { kind: "ok"; data: Health } | { kind: "unavailable"; detail: string }
 > {
   try {
     const data = await request<Health>("/api/health");
@@ -73,4 +83,15 @@ export const dataApi = {
   instagramStatus: () => request<Record<string, unknown>>("/api/v1/instagram/status"),
   instagramConnect: () =>
     request<{ authorization_url: string }>("/api/v1/instagram/connect"),
+  instagramRefresh: () =>
+    request<Record<string, unknown>>("/api/v1/instagram/refresh", { method: "POST" }),
+  mediaList: () =>
+    request<{ status: string; items: Array<Record<string, unknown>> }>("/api/v1/media"),
+  mediaUpload: (file: File) => {
+    const body = new FormData();
+    body.append("file", file);
+    return request<Record<string, unknown>>("/api/v1/media", { method: "POST", body });
+  },
+  mediaDelete: (id: string) =>
+    request<{ ok: boolean }>(`/api/v1/media/${id}`, { method: "DELETE" }),
 };

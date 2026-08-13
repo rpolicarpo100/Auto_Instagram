@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { StatusBlock } from "../components/ui/StatusBlock";
+import { useNavigate } from "react-router-dom";
 import { apiBase, authApi, dataApi } from "../lib/api";
 
 export function Settings() {
+  const nav = useNavigate();
   const [email, setEmail] = useState<string | null>(null);
   const [db, setDb] = useState("…");
   const [meta, setMeta] = useState("…");
@@ -43,6 +45,18 @@ export function Settings() {
         <StatusBlock label="Database" value={db} />
         <StatusBlock label="Meta OAuth" value={meta} />
       </div>
+      {email ? (
+        <button
+          type="button"
+          className="mt-8 border border-line px-5 py-2.5 font-sans text-sm"
+          onClick={async () => {
+            await authApi.logout();
+            nav("/");
+          }}
+        >
+          Log out
+        </button>
+      ) : null}
     </div>
   );
 }

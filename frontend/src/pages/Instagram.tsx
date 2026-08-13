@@ -17,6 +17,8 @@ export function Instagram() {
 
   const account = (status?.account as Record<string, string | null>) || {};
   const configured = status?.meta_configured === true;
+  const params = new URLSearchParams(window.location.search);
+  const oauthError = params.get("error");
 
   async function connect() {
     setBusy(true);
@@ -48,6 +50,9 @@ export function Instagram() {
           detail={account.username || "No token stored"}
         />
       </div>
+      {oauthError ? (
+        <p className="mt-4 font-sans text-sm text-sand">OAuth: {oauthError}</p>
+      ) : null}
       {error ? (
         <p className="mt-4 font-sans text-sm text-sand">
           {error === "NOT_AUTHENTICATED" ? (

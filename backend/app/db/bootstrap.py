@@ -1,6 +1,15 @@
 from app.db.base import Base
 from app.db.session import engine
-from app.models import Content, InstagramAccount, Job, MediaAsset, User, UserSession  # noqa: F401
+from app.models import (  # noqa: F401
+    AccountSnapshot,
+    Content,
+    InstagramAccount,
+    Job,
+    MediaAsset,
+    OAuthState,
+    User,
+    UserSession,
+)
 
 
 def create_schema() -> None:

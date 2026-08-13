@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.router import api_router
 from app.core.errors import register_exception_handlers
 from app.core.request_id import RequestIdMiddleware
+from app.core.security_headers import SecurityHeadersMiddleware
 from app.db.bootstrap import create_schema
 from app.settings import settings
 
@@ -13,6 +14,7 @@ app = FastAPI(
     description="Instagram Content OS. No fake metrics.",
 )
 
+app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(RequestIdMiddleware)
 origins = settings.cors_origin_list()
 if origins:
@@ -32,4 +34,8 @@ create_schema()
 @app.get("/api/health")
 @app.get("/health")
 def health() -> dict[str, str]:
-    return {"status": "ok", "service": "instagram-ai-factory"}
+    return {
+        "status": "ok",
+        "service": "instagram-ai-factory",
+        "database": "CONFIGURED" if settings.database_configured() else "NOT_CONFIGURED",
+    }

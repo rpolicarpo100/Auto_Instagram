@@ -15,7 +15,7 @@ def v1_health():
 
 @router.get("/version")
 def version():
-    return {"service": settings.app_name, "version": __version__, "phase": "08"}
+    return {"service": settings.app_name, "version": __version__, "phase": "10"}
 
 
 @router.get("/config")
@@ -26,6 +26,7 @@ def config(request: Request):
         "request_id": getattr(request.state, "request_id", ""),
         "database": "CONFIGURED" if SessionLocal is not None else "NOT_CONFIGURED",
         "meta_oauth": "CONFIGURED" if settings.meta_configured() else "NOT_CONFIGURED",
+        "frontend_origin": settings.public_frontend_origin() or "NOT_CONFIGURED",
         "instagram": ig,
         "note": "No secrets are included in this payload.",
     }

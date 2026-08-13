@@ -44,6 +44,7 @@ Thumbs.db
 
 # Local media / uploads (not permanent storage)
 storage/local/
+backend/storage/
 uploads/
 tmp/
 

@@ -43,6 +43,7 @@ class MetaInstagramProvider(InstagramProvider):
                 "response_type": "code",
                 "scope": ",".join(SCOPES),
                 "state": state,
+                "force_reauth": "true",
             }
         )
         return f"{settings.instagram_oauth_base}/oauth/authorize?{qs}"
@@ -50,7 +51,8 @@ class MetaInstagramProvider(InstagramProvider):
     def exchange_code(self, code: str) -> dict[str, Any]:
         if not settings.meta_configured():
             raise RuntimeError("META_NOT_CONFIGURED")
-        url = f"{settings.instagram_graph_base}/oauth/access_token"
+        # Official Instagram Login token endpoint
+        url = "https://api.instagram.com/oauth/access_token"
         with httpx.Client(timeout=20) as client:
             res = client.post(
                 url,
@@ -63,6 +65,30 @@ class MetaInstagramProvider(InstagramProvider):
                 },
             )
             res.raise_for_status()
+            short = res.json()
+        token = short.get("access_token")
+        if not token:
+            return short
+        long_lived = self._long_lived(token)
+        if long_lived.get("access_token"):
+            short["access_token"] = long_lived["access_token"]
+            short["expires_in"] = long_lived.get("expires_in")
+            short["token_type"] = "long_lived"
+        return short
+
+    def _long_lived(self, short_token: str) -> dict[str, Any]:
+        url = f"{settings.instagram_graph_base}/access_token"
+        with httpx.Client(timeout=20) as client:
+            res = client.get(
+                url,
+                params={
+                    "grant_type": "ig_exchange_token",
+                    "client_secret": settings.meta_app_secret,
+                    "access_token": short_token,
+                },
+            )
+            if res.status_code >= 400:
+                return {}
             return res.json()
 
     def get_profile(self, access_token: str) -> dict[str, Any]:

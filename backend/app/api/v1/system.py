@@ -15,7 +15,7 @@ def v1_health():
 
 @router.get("/version")
 def version():
-    return {"service": settings.app_name, "version": __version__, "phase": "10"}
+    return {"service": settings.app_name, "version": __version__, "phase": "11"}
 
 
 @router.get("/config")

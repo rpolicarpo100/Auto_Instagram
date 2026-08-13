@@ -17,6 +17,7 @@ Deployed API: `https://auto-instagram-1aci.onrender.com/api/health`
 
 - `DATABASE_URL` — Render PostgreSQL (required for login)
 - `CORS_ORIGINS` — exact Static Site origin, e.g. `https://xxx.onrender.com`
+- `FRONTEND_ORIGIN` — same URL (OAuth return)
 - `SESSION_SECRET`
 - `TOKEN_ENCRYPTION_KEY` (Fernet)
 - `META_APP_ID` / `META_APP_SECRET` / `META_REDIRECT_URI` = `https://auto-instagram-1aci.onrender.com/api/v1/instagram/callback`

@@ -44,7 +44,12 @@ class Settings(BaseSettings):
         return normalize_database_url(str(v))
 
     def cors_origin_list(self) -> list[str]:
-        return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+        out: list[str] = []
+        for raw in self.cors_origins.split(","):
+            part = raw.split("(")[0].strip()
+            if part.startswith("http://") or part.startswith("https://"):
+                out.append(part.rstrip("/"))
+        return out
 
     def public_frontend_origin(self) -> str:
         if self.frontend_origin.strip():

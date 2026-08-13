@@ -85,6 +85,11 @@ export const dataApi = {
     request<{ authorization_url: string }>("/api/v1/instagram/connect"),
   instagramRefresh: () =>
     request<Record<string, unknown>>("/api/v1/instagram/refresh", { method: "POST" }),
+  instagramMedia: () =>
+    request<{ status: string; items: Array<Record<string, unknown>> }>(
+      "/api/v1/instagram/media"
+    ),
+  videoStatus: () => request<Record<string, string>>("/api/v1/video/status"),
   mediaList: () =>
     request<{ status: string; items: Array<Record<string, unknown>> }>("/api/v1/media"),
   mediaUpload: (file: File) => {

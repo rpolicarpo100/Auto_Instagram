@@ -5,6 +5,8 @@ import { dataApi } from "../lib/api";
 
 export function Instagram() {
   const [status, setStatus] = useState<Record<string, unknown> | null>(null);
+  const [media, setMedia] = useState<Array<Record<string, unknown>>>([]);
+  const [mediaStatus, setMediaStatus] = useState("NO DATA");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -13,6 +15,13 @@ export function Instagram() {
       .instagramStatus()
       .then(setStatus)
       .catch((e) => setError(e.message || "FAILED"));
+    dataApi
+      .instagramMedia()
+      .then((r) => {
+        setMediaStatus(r.status);
+        setMedia(r.items || []);
+      })
+      .catch(() => setMediaStatus("NOT AVAILABLE"));
   }, []);
 
   const account = (status?.account as Record<string, string | null>) || {};
@@ -32,6 +41,22 @@ export function Instagram() {
     }
   }
 
+  async function refresh() {
+    setBusy(true);
+    try {
+      await dataApi.instagramRefresh();
+      const s = await dataApi.instagramStatus();
+      setStatus(s);
+      const m = await dataApi.instagramMedia();
+      setMediaStatus(m.status);
+      setMedia(m.items || []);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "FAILED");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <div>
       <h1 className="text-3xl tracking-tight">Instagram</h1>
@@ -42,7 +67,7 @@ export function Instagram() {
         <StatusBlock
           label="Meta OAuth"
           value={configured ? "CONFIGURED" : "NOT CONFIGURED"}
-          detail="Requires META_APP_ID, META_APP_SECRET, META_REDIRECT_URI"
+          detail="Requires META_APP_ID, META_APP_SECRET, META_REDIRECT_URI on the API service"
         />
         <StatusBlock
           label="Account"
@@ -64,14 +89,47 @@ export function Instagram() {
           )}
         </p>
       ) : null}
-      <button
-        type="button"
-        disabled={!configured || busy}
-        onClick={connect}
-        className="mt-8 border border-sand px-5 py-2.5 font-sans text-sm enabled:hover:bg-sand enabled:hover:text-ink disabled:cursor-not-allowed disabled:border-line disabled:text-mute"
-      >
-        {configured ? "Connect Instagram" : "Connect (META_NOT_CONFIGURED)"}
-      </button>
+      <div className="mt-8 flex flex-wrap gap-3">
+        <button
+          type="button"
+          disabled={!configured || busy}
+          onClick={connect}
+          className="border border-sand px-5 py-2.5 font-sans text-sm enabled:hover:bg-sand enabled:hover:text-ink disabled:cursor-not-allowed disabled:border-line disabled:text-mute"
+        >
+          {configured ? "Connect Instagram" : "Connect (META_NOT_CONFIGURED)"}
+        </button>
+        <button
+          type="button"
+          disabled={busy || account.status !== "CONNECTED"}
+          onClick={refresh}
+          className="border border-line px-5 py-2.5 font-sans text-sm disabled:text-mute"
+        >
+          Refresh account data
+        </button>
+      </div>
+      <h2 className="mt-10 text-xl">Published media</h2>
+      <p className="mt-1 font-sans text-xs text-mute">Status: {mediaStatus}</p>
+      <ul className="mt-4 space-y-2 font-sans text-sm">
+        {media.length === 0 ? (
+          <li className="text-mute">NO DATA</li>
+        ) : (
+          media.map((it) => (
+            <li key={String(it.id)} className="border border-line px-3 py-2">
+              {String(it.media_type || "MEDIA")} · {String(it.timestamp || "")}
+              {it.permalink ? (
+                <a
+                  className="ml-2 underline"
+                  href={String(it.permalink)}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  open
+                </a>
+              ) : null}
+            </li>
+          ))
+        )}
+      </ul>
     </div>
   );
 }

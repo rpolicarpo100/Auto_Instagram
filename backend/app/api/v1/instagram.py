@@ -176,3 +176,29 @@ def callback(request: Request, db: Session = Depends(get_db)):
     except Exception:
         pass
     return RedirectResponse(_frontend("/instagram", connected="1"), status_code=302)
+
+
+@router.get("/media")
+def list_ig_media(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    acc = (
+        db.query(InstagramAccount)
+        .filter(InstagramAccount.user_id == user.id)
+        .order_by(InstagramAccount.created_at.desc())
+        .first()
+    )
+    if acc is None or not acc.token_encrypted or not acc.ig_user_id:
+        return {"status": "NOT_CONFIGURED", "items": []}
+    if not settings.token_encryption_key:
+        return {"status": "NOT_CONFIGURED", "items": [], "reason": "TOKEN_ENCRYPTION_KEY"}
+    from app.security.tokens import decrypt_secret
+
+    try:
+        token = decrypt_secret(acc.token_encrypted)
+        items = InstagramService().provider.get_media(token, acc.ig_user_id)
+    except Exception as exc:
+        return {"status": "NOT AVAILABLE", "items": [], "reason": str(exc)[:200]}
+    return {
+        "status": "REAL" if items else "NO DATA",
+        "source": "Instagram Graph API media",
+        "items": items,
+    }
